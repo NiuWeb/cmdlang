@@ -1,0 +1,6 @@
+.eslintrc.cjs
+dist/*
+lib/*
+app/*
+*.config.js
+*.config.cjs
