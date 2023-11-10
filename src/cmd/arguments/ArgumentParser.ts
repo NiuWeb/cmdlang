@@ -1,6 +1,7 @@
 import { Dictionary } from "@src/globals/globals"
 import { Argument } from "./Argument"
 import { ArgumentList } from "./ArgumentList"
+import { CmdSplit } from "../utils/split"
 
 /**
  * A parser for a list of arguments.
@@ -65,7 +66,7 @@ export class ArgumentParser {
      * @param template The template string. Read the class description for more info.
      * @param docs A dictionary of documentation with extended descriptions for the arguments.
      */
-    constructor(public template: string, private docs?: Readonly<Dictionary>) { 
+    constructor(public template: string, private docs?: Readonly<Dictionary>) {
         this.parseTemplate()
     }
 
@@ -83,15 +84,15 @@ export class ArgumentParser {
      * gets the arguments list from the template string
      */
     private parseTemplate() {
-        const parts = ArgumentParser.split(this.template.trim())
+        const parts = CmdSplit(this.template.trim())
         const expr = /^\[([^\]]*)\]$/
 
         let previous: Argument | undefined = undefined
 
-        for(let arg of parts) {
+        for (let arg of parts) {
             const match = arg.match(expr)
             const optional = !!match
-            if(optional) {
+            if (optional) {
                 arg = match![1]
             }
             const argParts = arg.split("=")
@@ -99,22 +100,22 @@ export class ArgumentParser {
             const name = argParts.shift()
             const extra = argParts.join("=")
 
-            if(!name) {
+            if (!name) {
                 throw new Error(`Invalid argument name: ${arg}`)
             }
 
-            if(name.endsWith("...")) {
-                if(!positional) {
+            if (name.endsWith("...")) {
+                if (!positional) {
                     throw new Error(`Named arguments cannot have suffix '...': ${name}`)
                 }
                 this.max = Infinity
             }
 
             let label = name
-            if(!positional) {
+            if (!positional) {
                 label += "=" + extra
             }
-            if(optional) {
+            if (optional) {
                 label = "[" + label + "]"
             }
 
@@ -126,12 +127,12 @@ export class ArgumentParser {
                 description: this.docs?.[name]
             }
 
-            if(argument.positional) {
-                if(previous) {
-                    if(previous.optional && !argument.optional) {
+            if (argument.positional) {
+                if (previous) {
+                    if (previous.optional && !argument.optional) {
                         throw new Error(`Optional arguments must be at the end of the positional list: ${previous.name}`)
                     }
-                    if(previous.name.endsWith("...")) {
+                    if (previous.name.endsWith("...")) {
                         throw new Error(`'...' argument must be at the end of the list: ${previous.name}`)
                     }
                 }
@@ -143,7 +144,6 @@ export class ArgumentParser {
                 }
                 this.max++
             } else {
-                console.log(argument)
                 this.named.push(argument)
             }
         }
@@ -155,11 +155,11 @@ export class ArgumentParser {
     public toString() {
         let str = ""
 
-        for(const arg of this.positional) {
+        for (const arg of this.positional) {
             str += arg.label + " "
         }
 
-        for(const arg of this.named) {
+        for (const arg of this.named) {
             str += arg.label + " "
         }
 
@@ -181,11 +181,11 @@ export class ArgumentParser {
     public setDocs(docs: Dictionary) {
         this.docs = docs
 
-        for(const arg of this.positional) {
+        for (const arg of this.positional) {
             arg.description = docs[arg.name]
         }
 
-        for(const arg of this.named) {
+        for (const arg of this.named) {
             arg.description = docs[arg.name]
         }
     }
@@ -194,7 +194,16 @@ export class ArgumentParser {
      * Parses a string with a list of arguments, throws if invalid.
      */
     public parse(argstring: string): ArgumentList {
-        const list = this._parse(argstring)
+        const list = this._parse(CmdSplit(argstring.trim()))
+        this._validate(list)
+        return list
+    }
+
+    /**
+     * Parses a list of arguments, throws if invalid.
+     */
+    public parseList(parts: string[]): ArgumentList {
+        const list = this._parse(parts)
         this._validate(list)
         return list
     }
@@ -202,14 +211,12 @@ export class ArgumentParser {
     /**
      * Parses a list of arguments.
      */
-    private _parse(origin: string): ArgumentList {
-        const parts = ArgumentParser.split(origin.trim())
-
+    private _parse(parts: string[]): ArgumentList {
         const values: string[] = []
         const named: Dictionary = {}
 
-        for(const arg of parts) {
-            if(arg.includes("=")) {
+        for (const arg of parts) {
+            if (arg.includes("=")) {
                 const [name, value] = arg.split("=")
                 named[name] = value
             } else {
@@ -223,25 +230,25 @@ export class ArgumentParser {
      * validates a list of arguments
      */
     private _validate(list: ArgumentList) {
-        if(list.values.length < this.min) {
+        if (list.values.length < this.min) {
             throw new Error(`Expected at least ${this.min} positional arguments, got ${list.values.length}`)
         }
-        if(list.values.length > this.max) {
+        if (list.values.length > this.max) {
             throw new Error(`Expected at most ${this.max} positional arguments, got ${list.values.length}`)
         }
 
         const namedWant = this.named.map(arg => arg.name)
         const namedHave = Object.keys(list.named)
 
-        for(const name of namedHave) {
-            if(!namedWant.includes(name)) {
+        for (const name of namedHave) {
+            if (!namedWant.includes(name)) {
                 throw new Error(`Unexpected named argument: ${name}`)
             }
         }
 
-        for(const name of namedWant) {
+        for (const name of namedWant) {
             const arg = this.named.find(arg => arg.name === name)!
-            if(!arg.optional && !namedHave.includes(name)) {
+            if (!arg.optional && !namedHave.includes(name)) {
                 throw new Error(`Expected named argument: ${name}`)
             }
         }
@@ -266,22 +273,5 @@ export class ArgumentParser {
      */
     public get namedArgs(): readonly Readonly<Argument>[] {
         return this.named
-    }
-
-
-    /**
-     * Splits a string into parts that will count as arguments.
-     */
-    public static split(str: string): string[] {
-        const expr = /"[^"]+"|[^\s]+/g
-        const parts = str.matchAll(expr)
-        return Array.from(parts)
-        .map(part => {
-            const value = part[0]
-            if(value.startsWith("\"") && value.endsWith("\"")) {
-                return value.slice(1, -1)
-            }
-            return value  
-        })
     }
 }

@@ -1,17 +1,5 @@
 import { ArgumentParser } from "./ArgumentParser"
 
-
-describe("parts splitting", () => {
-    test("words are split by spaces", () => {
-        const list = ArgumentParser.split("name age aaa...bbb")
-        expect(list).toEqual(["name", "age", "aaa...bbb"])
-    })
-    test("arguments with quotes are also split", () => {
-        const list = ArgumentParser.split("arg0 arg1 \"all of this is the arg2\" arg3")
-        expect(list).toEqual(["arg0", "arg1", "all of this is the arg2", "arg3"])
-    })
-})
-
 describe("template parsing", () => {
     test("parse positional argument list", () => {
         const list = new ArgumentParser("name age [gender] [email]")
