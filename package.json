@@ -1,0 +1,26 @@
+{
+  "name": "cmdlang",
+  "version": "0.0.1",
+  "description": "simple command-line language with support for embed mathematical expressions",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "npx jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/NiuWeb/cmdlang"
+  },
+  "keywords": [
+    "cmd",
+    "language",
+    "cli",
+    "programming",
+    "declarative",
+    "math"
+  ],
+  "author": "bygdle",
+  "license": "MIT",
+  "dependencies": {
+    "@bygdle/expr-parser": "^0.4.0"
+  }
+}
