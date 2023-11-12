@@ -135,6 +135,18 @@ describe("Preprocessing parser", () => {
         expect(parser.getConstant("y")).toBe("50")
         expect(parseFloat(parser.getConstant("cat")!)).toBeCloseTo(1 - Math.sqrt(1.5))
         expect(parseFloat(parser.getConstant("dog")!)).toBeCloseTo(1 + (1 - Math.sqrt(1.5))/2)
+        console.log("'" + parser.preprocess() + "'")
     })
+    
 
+    test("another example", () => {
+        const parser = create()
+        parser.parse(`
+        const $name myvar
+        set $name {1 + sqrt(5)/2}  
+        get $name
+    `)
+        console.log(parser.getTokens())
+        console.log("'" + parser.preprocess() + "'")
+    })
 })

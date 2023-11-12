@@ -160,39 +160,24 @@ export class Parser {
             values: [this.input.slice(end)]
         })
 
-        let line = 1
-        let col = 1
         let output = ""
 
         for(const token of newTokens) {
-            // go to the required line
-            const linDif = Math.max(0, token.start[0] - line)
-            output += "\n".repeat(linDif)
-            line += linDif
+            const start = this.table.getIndex(token.start)
+            const end = this.table.getIndex(token.end)
 
-            // go to the required column
-            let colDif = Math.max(0, token.start[1] - col)
-            output += " ".repeat(colDif)
-            col += colDif
+            const value = token.values.join("")
 
-            const content = token.values.join("")
-            const contentLines = content.split("\n")
-            let lineCount = contentLines.length - 1
-            if(lineCount === 1 && contentLines[0] === "") {
-                lineCount = 0
-            }
+            const nlines = Math.max(0, start - output.length + 1)
+            output += " ".repeat(nlines)
 
-            output += content
-            line += lineCount
+            output += value
 
-            colDif = Math.max(
-                0,
-                (token.end[1] - token.start[1] ) - 
-                contentLines[contentLines.length - 1].length
-            )
-            output += " ".repeat(colDif)
-            col += colDif
+            const nwhites = Math.max(0, (end - start) - value.length)
+            output += " ".repeat(nwhites)
         }
+
+        output = this.replaceConstant(output)
 
         return output
     }
