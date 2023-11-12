@@ -1,5 +1,5 @@
 import { Token } from "./Token"
-import { EXPR_CONST_REPLACE } from "./expressions"
+import { EXPR_CONST } from "./expressions"
 
 /**
  * Takes the three tokens for a constant definition and validates them.
@@ -13,7 +13,7 @@ export function validateConstantTokens(token: Token, nameToken: Token, valueToke
         throw new Error(`expected constant name after "const" at ${token.start}`)
     }
 
-    if (!nameToken.value.match(EXPR_CONST_REPLACE)) {
+    if (!nameToken.value.match(EXPR_CONST)) {
         throw new Error(`constant name must be a valid identifier at ${nameToken.start}`)
     }
 

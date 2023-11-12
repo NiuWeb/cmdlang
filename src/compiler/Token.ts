@@ -13,3 +13,10 @@ export interface Parsed {
     start: Location
     end: Location
 }
+
+
+export interface Instruction {
+    start: Location
+    end: Location
+    values: string[]
+}
