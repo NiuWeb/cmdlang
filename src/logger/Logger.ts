@@ -13,10 +13,18 @@ export class Logger {
     private _log: Log[] = []
     private _line = 1
 
+    /**
+     * If true, the logger will save all logs in memory.
+     * Otherwise, it will only send them to the output.
+     */
+    public save = true
+
     public out = console.log
 
     private addLog(log: Log) {
-        this._log.push(log)
+        if (this.save) {
+            this._log.push(log)
+        }
         this.out(`[${log.type} at line ${log.line}] ${log.message}`)
     }
 
@@ -74,7 +82,7 @@ export class Logger {
 
     public toString() {
         return this._log
-        .map(log => `[${log.type} at line ${log.line}] ${log.message}`)
-        .join("\n")
+            .map(log => `[${log.type} at line ${log.line}] ${log.message}`)
+            .join("\n")
     }
 }
