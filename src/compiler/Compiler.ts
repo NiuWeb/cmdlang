@@ -37,6 +37,7 @@ export class Compiler<Context, Value> {
         for (const instruction of instructions) {
             // compile all instructions
             try {
+                this.program.logger.setLine(instruction.start)
                 const compiled = this.program.compile(instruction.values)
                 const wrapped: Compiled<Value> = () => {
                     try {
