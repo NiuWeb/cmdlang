@@ -16,9 +16,15 @@ export class Compiler<Context, Value> {
     public constants = new Map<string, string>()
 
     /**
+     * If true, the compiler will catch all errors and only
+     * add them to the program log
+     */
+    public catch = true
+
+    /**
      * Creates a new compiler for the given program
      */
-    constructor(public program: Program<Context, Value>) {}
+    constructor(public program: Program<Context, Value>) { }
 
     /**
      * Compiles a code string into a single function
@@ -32,6 +38,7 @@ export class Compiler<Context, Value> {
     }
 
     public compile(instructions: Instruction[], options: CompilerOptions = {}): Compiled<Value[]> {
+        const logger = this.program.logger
         const functions: Compiled<Value>[] = []
 
         const lineStart = Math.max(1, Math.floor(options.line || 1))
@@ -39,26 +46,37 @@ export class Compiler<Context, Value> {
         for (const instruction of instructions) {
             // compile all instructions
             try {
-                this.program.logger.setLine(instruction.start)
-                this.program.logger.setLine(this.program.logger.line + lineStart - 1)
+                logger.setLine(instruction.start)
+                logger.setLine(logger.line + lineStart - 1)
                 const compiled = this.program.compile(instruction.values)
                 const wrapped: Compiled<Value> = () => {
                     try {
                         return compiled()
                     } catch (e) {
                         if (e instanceof Error) {
+                            logger.error(e.message)
                             e.message = `Error at ${instruction.start}: ${e.message}`
+                        } else {
+                            logger.error(String(e).valueOf())
                         }
-                        throw e
+                        if (!this.catch) {
+                            throw e
+                        }
+                        return undefined as Value
                     }
                 }
                 functions.push(wrapped)
             } catch (e) {
                 // add the instruction start to the error message
                 if (e instanceof Error) {
+                    logger.error(e.message)
                     e.message = `Error at ${instruction.start}: ${e.message}`
+                } else {
+                    logger.error(String(e).valueOf())
                 }
-                throw e
+                if (!this.catch) {
+                    throw e
+                }
             }
         }
 
