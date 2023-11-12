@@ -1,6 +1,7 @@
 import { Dictionary } from "@src/globals/globals"
 import { Compiled } from "./Compiled"
 import { CommandInput } from "./CommandInput"
+import type { Program } from "./Program"
 
 /**
  * Definition of a single command.
@@ -22,5 +23,5 @@ export interface Command<Context = void, Value = void> {
      * the compile function. Will recieve the command arguments and
      * return a function that should be able to execute multiple times.
      */
-    compile?(input: CommandInput, context: Context): Compiled<Value>
+    compile?(input: CommandInput, program: Program<Context, Value>): Compiled<Value>
 }

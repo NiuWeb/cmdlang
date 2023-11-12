@@ -40,24 +40,24 @@ test("compiling", () => {
                 "add": {
                     name: "add",
                     arguments: "[width=] [height=]",
-                    compile({ named }, ctx) {
+                    compile({ named }, { context }) {
                         const { width, height } = named
                         const w = Number(width).valueOf()
                         const h = Number(height).valueOf()
 
                         return () => {
-                            ctx.push({ w, h })
+                            context.push({ w, h })
                         }
                     }
                 },
                 "perimeter": {
                     name: "perimeter",
                     arguments: "index",
-                    compile({ values }, ctx) {
+                    compile({ values }, { context }) {
                         const index = Number(values[0]).valueOf()
 
                         return () => {
-                            const square = ctx[index]
+                            const square = context[index]
                             return square.w * 2 + square.h * 2
                         }
                     }

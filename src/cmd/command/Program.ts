@@ -2,6 +2,7 @@ import { Dictionary } from "@src/globals/globals"
 import { Command } from "./Command"
 import { Compiled } from "./Compiled"
 import { ArgumentParser } from "../arguments/ArgumentParser"
+import { Logger } from "@src/logger/Logger"
 
 /**
  * A program contains a tree of commands, and a context
@@ -10,6 +11,8 @@ import { ArgumentParser } from "../arguments/ArgumentParser"
  * which will run the command.
  */
 export class Program<Context, Value = void> {
+
+    public logger = Logger.Global
 
     /**
      * Creates a new program
@@ -59,6 +62,6 @@ export class Program<Context, Value = void> {
         const parser = new ArgumentParser(cmd.arguments || "", cmd.docs)
         const args = parser.parseList(rem)
 
-        return fn(args, this.context)
+        return fn(args, this)
     }
 }

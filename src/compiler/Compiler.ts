@@ -18,9 +18,7 @@ export class Compiler<Context, Value> {
     /**
      * Creates a new compiler for the given program
      */
-    constructor(public program: Program<Context, Value>) {
-        this.program = program
-    }
+    constructor(public program: Program<Context, Value>) {}
 
     /**
      * Compiles a code string into a single function
