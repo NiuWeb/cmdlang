@@ -67,4 +67,14 @@ export class Logger {
     public errorf(msg: string, ...format: unknown[]) {
         this.error(sprintf(msg, ...format))
     }
+
+    public clear() {
+        this._log = []
+    }
+
+    public toString() {
+        return this._log
+        .map(log => `[${log.type} at line ${log.line}] ${log.message}`)
+        .join("\n")
+    }
 }
