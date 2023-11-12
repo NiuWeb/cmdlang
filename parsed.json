@@ -1,0 +1,75 @@
+[
+  {
+    "type": "instruction",
+    "values": [
+      {
+        "type": "part",
+        "value": "a",
+        "start": [
+          2,
+          5
+        ],
+        "end": [
+          2,
+          6
+        ]
+      },
+      {
+        "type": "part",
+        "value": "set=\"my value\"",
+        "start": [
+          2,
+          7
+        ],
+        "end": [
+          2,
+          21
+        ]
+      },
+      {
+        "type": "part",
+        "value": "another \n    argument here",
+        "start": [
+          2,
+          22
+        ],
+        "end": [
+          3,
+          19
+        ]
+      },
+      {
+        "type": "part",
+        "value": "is",
+        "start": [
+          3,
+          20
+        ],
+        "end": [
+          3,
+          22
+        ]
+      },
+      {
+        "type": "part",
+        "value": "done",
+        "start": [
+          3,
+          23
+        ],
+        "end": [
+          3,
+          27
+        ]
+      }
+    ],
+    "start": [
+      2,
+      5
+    ],
+    "end": [
+      3,
+      27
+    ]
+  }
+]
