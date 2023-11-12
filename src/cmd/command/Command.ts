@@ -12,6 +12,13 @@ export interface Command<Context = void, Value = void> {
     name: string
     /** command doc description */
     description?: string
+
+    /**
+     * command doc examples. If an array,
+     * each item will be a different code block.
+     */
+    example?: string | string[]
+
     /** command arguments list template string. Read `ArgumentParser` class docs for more info */
     arguments?: string
     /** documentation dictionary for the arguments */
