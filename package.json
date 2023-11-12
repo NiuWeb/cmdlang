@@ -26,6 +26,7 @@
   "devDependencies": {
     "@bygdle/lib-build": "^0.0.6",
     "@types/jest": "^29.5.3",
+    "@types/sprintf-js": "^1.1.4",
     "@typescript-eslint/eslint-plugin": "^6.2.1",
     "@typescript-eslint/parser": "^6.2.1",
     "esbuild-jest": "^0.5.0",
@@ -38,6 +39,7 @@
     "typescript-transform-paths": "^3.4.6"
   },
   "dependencies": {
+    "sprintf-js": "^1.1.3",
     "@bygdle/expr-parser": "^0.9.0"
   }
 }
