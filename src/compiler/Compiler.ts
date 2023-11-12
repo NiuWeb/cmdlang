@@ -3,6 +3,7 @@ import { Parser as LangParser } from "./Parser"
 import { EXPR_CONST } from "./expressions"
 import { Instruction, Token } from "./Token"
 import { Program } from "@src/cmd/command/Program"
+import { Compiled } from "@src/cmd/command/Compiled"
 
 /**
  * The compiler takes a code string and transform it to a list of instructions
@@ -20,6 +21,117 @@ export class Compiler<Context, Value> {
     constructor(public program: Program<Context, Value>) {
         this.program = program
     }
+
+    /**
+     * Compiles a code string into a single function
+     * that will run all instructions in order.
+     * @returns the compiled function which returns
+     * the list of all instruction results
+     */
+    public compileString(input: string): Compiled<Value[]> {
+        const instructions = this.preprocess(input)
+        return this.compile(instructions)
+    }
+
+    public compile(instructions: Instruction[]): Compiled<Value[]> {
+        const functions: Compiled<Value>[] = []
+
+        for (const instruction of instructions) {
+            // compile all instructions
+            try {
+                const compiled = this.program.compile(instruction.values)
+                const wrapped: Compiled<Value> = () => {
+                    try {
+                        return compiled()
+                    } catch (e) {
+                        if (e instanceof Error) {
+                            e.message = `Error at ${instruction.start}: ${e.message}`
+                        }
+                        throw e
+                    }
+                }
+                functions.push(wrapped)
+            } catch (e) {
+                // add the instruction start to the error message
+                if (e instanceof Error) {
+                    e.message = `Error at ${instruction.start}: ${e.message}`
+                }
+                throw e
+            }
+        }
+
+        return () => functions.map(f => f())
+    }
+
+
+    /**
+     * Takes a code string, evaluates the constant declarations
+     * and expressions, and returns the evaluated code.
+     * Instructions are not evaluated, this is just a
+     * replacement step.
+     * @returns A list of preprocessed instructions, with
+     * all constants and expressions evaluated and replaced.
+     */
+    public preprocess(input: string): Instruction[] {
+        const parsed = this.langParser.parse(input)
+        const result: Instruction[] = []
+
+        for (const token of parsed) {
+            // constant tokens
+            if (token.type === "constant") {
+                const nameToken = token.values[0]
+                const valueToken = token.values[1]
+
+                const name = nameToken.value
+
+                if (this.constants.has(name)) {
+                    throw new Error(`cannot redefine constant "${name}" at ${nameToken.start}`)
+                }
+
+                // evaluate constant value if it's an expression
+                if (valueToken.type === "expression") {
+                    const value = this.evaluateExpression(valueToken)
+                    this.constants.set(name, value.toString())
+                } else { // otherwise just set it
+                    this.constants.set(name, valueToken.value)
+                }
+            } else {
+                // for an instruction token, evaluate all expressions
+                for (const t of token.values) {
+                    if (t.type === "expression") {
+                        t.value = this.evaluateExpression(t).toString()
+                    }
+                }
+
+                // join tokens that are next to each other:
+                // if a token starts exactly where the previous one ends,
+                // they should be joined
+
+                for (let i = 1; i < token.values.length; i++) {
+                    const prev = token.values[i - 1]
+                    const curr = token.values[i]
+
+                    if (prev.end[0] === curr.start[0] && prev.end[1] === curr.start[1]) {
+                        prev.value += curr.value
+                        prev.end = curr.end
+                        token.values.splice(i, 1)
+                        i--
+                    }
+                }
+
+                const parts = token.values.map(t => t.value)
+
+                result.push({
+                    start: token.start,
+                    end: token.end,
+                    values: parts
+                })
+            }
+        }
+
+        return result
+    }
+
 
     /**
      * Replaces all constants in the form `$name` with their value.
@@ -59,62 +171,14 @@ export class Compiler<Context, Value> {
         let input = token.value
         input = this.replaceConstants(input, true)
 
+        // add line breaks at the beginnig
+        input = "\n".repeat(token.start[0] - 1) + " ".repeat(token.start[1] - 1) + input
+
         const expr = this.exprParser.parse(input)
         if (expr.length === 0) {
             return 0
         } else {
             return expr.evaluate(expr.length - 1)
         }
-    }
-    /**
-     * Takes a code string, evaluates the constant declarations
-     * and expressions, and returns the evaluated code.
-     * Instructions are not evaluated, this is just a
-     * replacement step.
-     * @returns A list of preprocessed instructions, with
-     * all constants and expressions evaluated and replaced.
-     */
-    public preprocess(input: string): Instruction[] {
-        const parsed = this.langParser.parse(input)
-        const result: Instruction[] = []
-
-        for (const token of parsed) {
-            // constant tokens
-            if (token.type === "constant") {
-                const nameToken = token.values[0]
-                const valueToken = token.values[1]
-
-                const name = nameToken.value
-
-                if (this.constants.has(name)) {
-                    throw new Error(`cannot redefine constant "${name}" at ${nameToken.start}`)
-                }
-
-                // evaluate constant value if it's an expression
-                if (valueToken.type === "expression") {
-                    const value = this.evaluateExpression(valueToken)
-                    this.constants.set(name, value.toString())
-                } else { // otherwise just set it
-                    this.constants.set(name, valueToken.value)
-                }
-            } else {
-                // for an instruction token, evaluate all expressions
-                const parts = token.values.map(child => {
-                    if (child.type === "expression") {
-                        return this.evaluateExpression(child).toString()
-                    } else {
-                        return child.value
-                    }
-                })
-
-                result.push({
-                    start: token.start,
-                    end: token.end,
-                    values: parts
-                })
-            }
-        }
-
-        return result
     }
 }

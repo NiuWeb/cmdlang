@@ -28,3 +28,65 @@ test("compiler preprocessing", () => {
 
     expect(strval).toBe(expected)
 })
+
+
+test("compiling", () => {
+    const squares: { w: number, h: number }[] = []
+
+    const program = new Program(squares, {
+        "square": {
+            name: "square",
+            children: {
+                "add": {
+                    name: "add",
+                    arguments: "[width=] [height=]",
+                    compile({ named }, ctx) {
+                        const { width, height } = named
+                        const w = Number(width).valueOf()
+                        const h = Number(height).valueOf()
+
+                        return () => {
+                            ctx.push({ w, h })
+                        }
+                    }
+                },
+                "perimeter": {
+                    name: "perimeter",
+                    arguments: "index",
+                    compile({ values }, ctx) {
+                        const index = Number(values[0]).valueOf()
+
+                        return () => {
+                            const square = ctx[index]
+                            return square.w * 2 + square.h * 2
+                        }
+                    }
+                }
+            }
+        }
+    })
+
+    const compiler = new Compiler(program)
+
+
+    const cmd = compiler.compileString(`
+    
+        const $pi {22/7}
+
+        square add width=5 height=7 // instruction 1
+        square add width={ // instruction 2
+            2+2
+        } height={
+            1 + $pi^2
+        }
+
+        square perimeter 0 # instruction 3
+        square perimeter { 5/5 } /* instruction 4 */
+
+    `)
+
+    const [, , a, b] = cmd()
+
+    expect(a).toBeCloseTo(2 * 5 + 2 * 7)
+    expect(b).toBeCloseTo(2 * 4 + 2 * (1 + (22 / 7) ** 2))
+})
