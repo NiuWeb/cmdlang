@@ -11,7 +11,7 @@ export class Logger {
     public static Global = new Logger()
 
     private _log: Log[] = []
-    private line = 1
+    private _line = 1
 
     public out = console.log
 
@@ -22,17 +22,21 @@ export class Logger {
 
     public setLine(line: number | Location) {
         if (typeof line === "number") {
-            this.line = line
+            this._line = line
         } else {
-            this.line = line[0]
+            this._line = line[0]
         }
+    }
+
+    public get line() {
+        return this._line
     }
 
     public log(msg: string) {
         this.addLog({
             type: "log",
             message: msg,
-            line: this.line
+            line: this._line
         })
     }
 
@@ -44,7 +48,7 @@ export class Logger {
         this.addLog({
             type: "warn",
             message: msg,
-            line: this.line
+            line: this._line
         })
     }
 
@@ -56,7 +60,7 @@ export class Logger {
         this.addLog({
             type: "error",
             message: msg,
-            line: this.line
+            line: this._line
         })
     }
 

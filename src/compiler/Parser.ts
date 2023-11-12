@@ -1,7 +1,7 @@
 import { StringLines } from "@bygdle/expr-parser"
 import { RemoveComments } from "./comments"
 import { EXPR_BLOCK_EXPRESSION, EXPR_BLOCK_QUOTE, EXPR_BLOCK_QUOTE_NAMED, EXPR_PART } from "./expressions"
-import { Parsed, Token } from "./Token"
+import { Parsed, Token } from "./types"
 import { validateConstantTokens } from "./utils"
 
 /**

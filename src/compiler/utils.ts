@@ -1,4 +1,4 @@
-import { Token } from "./Token"
+import { Token } from "./types"
 import { EXPR_CONST } from "./expressions"
 
 /**

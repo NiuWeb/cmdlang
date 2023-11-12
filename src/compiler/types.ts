@@ -20,3 +20,11 @@ export interface Instruction {
     end: Location
     values: string[]
 }
+
+
+export interface CompilerOptions {
+    /**
+     * If set, line count will start at this number.
+     */
+    line?: number
+}

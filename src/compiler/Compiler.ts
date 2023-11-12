@@ -1,7 +1,7 @@
 import { Parser as ExprParser } from "@bygdle/expr-parser"
 import { Parser as LangParser } from "./Parser"
 import { EXPR_CONST } from "./expressions"
-import { Instruction, Token } from "./Token"
+import { CompilerOptions, Instruction, Token } from "./types"
 import { Program } from "@src/cmd/command/Program"
 import { Compiled } from "@src/cmd/command/Compiled"
 
@@ -26,18 +26,21 @@ export class Compiler<Context, Value> {
      * @returns the compiled function which returns
      * the list of all instruction results
      */
-    public compileString(input: string): Compiled<Value[]> {
+    public compileString(input: string, options: CompilerOptions = {}): Compiled<Value[]> {
         const instructions = this.preprocess(input)
-        return this.compile(instructions)
+        return this.compile(instructions, options)
     }
 
-    public compile(instructions: Instruction[]): Compiled<Value[]> {
+    public compile(instructions: Instruction[], options: CompilerOptions = {}): Compiled<Value[]> {
         const functions: Compiled<Value>[] = []
+
+        const lineStart = Math.max(1, Math.floor(options.line || 1))
 
         for (const instruction of instructions) {
             // compile all instructions
             try {
                 this.program.logger.setLine(instruction.start)
+                this.program.logger.setLine(this.program.logger.line + lineStart - 1)
                 const compiled = this.program.compile(instruction.values)
                 const wrapped: Compiled<Value> = () => {
                     try {
