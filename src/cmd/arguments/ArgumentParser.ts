@@ -223,7 +223,7 @@ export class ArgumentParser {
                 values.push(arg)
             }
         }
-        return { values, named }
+        return { values, named, parts }
     }
 
     /**
