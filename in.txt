@@ -1,0 +1,17 @@
+
+    
+    const $x 150%
+    do something here
+    const $y 50
+
+    {1 + 1} + 1
+
+    const $awa {1 - sqrt($x)}
+
+
+    const $uwu {
+        1 + $awa/2
+    }
+    another {    1    } thing {$uwu - 1} in here
+
+    

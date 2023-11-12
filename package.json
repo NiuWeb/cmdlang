@@ -38,6 +38,6 @@
     "typescript-transform-paths": "^3.4.6"
   },
   "dependencies": {
-    "@bygdle/expr-parser": "^0.5.0"
+    "@bygdle/expr-parser": "^0.8.0"
   }
 }

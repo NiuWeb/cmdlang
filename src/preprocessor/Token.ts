@@ -3,11 +3,13 @@ import { Location } from "@bygdle/expr-parser"
 /**
  * Preprocessor tokens are:
  * - Constant definitions
- * - Embed expressions
+ * - Brackets for opening and closing expressions
+ * - Replacements for already processed constants or expressions
  */
+
 export interface Token {
-    type: "constant" | "expression"
-    values: string[]
     start: Location
     end: Location
+    type: "bracketOpen" | "bracketClose" | "constant" | "replacement"
+    values: string[]
 }
