@@ -167,8 +167,11 @@ export class Compiler<Context, Value> {
      * @param numberOnly If true, only constants with a number value will be replaced
      * @returns The input with constants replaced
      */
-    private replaceConstants(input: string, numberOnly = false) {
+    public replaceConstants(input: string, numberOnly = false) {
         return input.replace(EXPR_CONST, (match) => {
+
+            console.log("replacing", match)
+
             const value = this.constants.get(match)
             if (value === undefined) return match
 

@@ -107,4 +107,7 @@ test("compiling", () => {
     expect(b).toBeCloseTo(2 * 4 + 2 * (1 + (22 / 7) ** 2))
     expect(c).toEqual((22 / 7).toString())
     expect(d).toEqual("50")
+
+    const cmd2 = compiler.compileString("const $x 1\r\n\recho $x")
+    expect(cmd2()).toEqual(["1"])
 })
