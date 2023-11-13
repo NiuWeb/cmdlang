@@ -26,6 +26,11 @@ export class Compiler<Context, Value> {
      */
     constructor(public program: Program<Context, Value>) { }
 
+    /** sets the compiler program */
+    public setProgram(program: Program<Context, Value>) {
+        this.program = program
+    }
+
     /**
      * Compiles a code string into a single function
      * that will run all instructions in order.
