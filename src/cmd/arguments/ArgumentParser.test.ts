@@ -70,4 +70,19 @@ describe("argument parsing", () => {
         expect(() => control.parse("age=20 name=john index=1")).not.toThrow()
     })
 
+    test("unexpected named arguments", () => {
+        const control = new ArgumentParser("name= age= [index=]")
+        expect(() => control.parse("name=john age=20 index=1")).not.toThrow()
+        expect(() => control.parse("name=john age=20 index=1 another=2")).toThrow()
+    })
+
+    test("any named argument", () => {
+        const list = new ArgumentParser("arg0 arg1 [AnotherThing*=]")
+        expect(() => list.parse("arg0 arg1")).not.toThrow()
+        expect(() => list.parse("arg0 arg1 x=4 y=5")).not.toThrow()
+
+        const val = list.parse("arg0 arg1 x=4 y=5")
+        expect(val.named).toEqual({ x: "4", y: "5" })
+    })
+
 })

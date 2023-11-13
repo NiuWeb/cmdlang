@@ -32,6 +32,9 @@ import { CmdSplit } from "../utils/split"
  * If you include a final argument with suffix `...`, it will 
  * allow you to provide any maximum number of arguments.
  * 
+ * - A special case for named arguments: `[ArgumentName*=]` will allow you to
+ * provide any number of named arguments with any name.
+ * 
  * Some examples:
  * 
  * ```
@@ -58,6 +61,7 @@ import { CmdSplit } from "../utils/split"
 export class ArgumentParser {
     private positional: Argument[] = []
     private named: Argument[] = []
+    private anyNamed = false
     private min = 0
     private max = 0
 
@@ -96,11 +100,11 @@ export class ArgumentParser {
                 arg = match![1]
             }
             const argParts = arg.split("=")
-            const positional = argParts.length === 1
+            const positional = argParts.length === 1 // positional arguments have no '='
             const name = argParts.shift()
             const extra = argParts.join("=")
 
-            if (!name) {
+            if (!name) { // both positional and named have an argument name
                 throw new Error(`Invalid argument name: ${arg}`)
             }
 
@@ -111,6 +115,11 @@ export class ArgumentParser {
                 this.max = Infinity
             }
 
+            if(!positional && optional && name.endsWith("*")) {
+                this.anyNamed = true
+            }
+
+            // re-create the argument label
             let label = name
             if (!positional) {
                 label += "=" + extra
@@ -237,6 +246,12 @@ export class ArgumentParser {
             throw new Error(`Expected at most ${this.max} positional arguments, got ${list.values.length}`)
         }
 
+        // skip named arguments validation if anyNamed is true
+        if (this.anyNamed) {
+            return
+        }
+
+        // validate named arguments
         const namedWant = this.named.map(arg => arg.name)
         const namedHave = Object.keys(list.named)
 
