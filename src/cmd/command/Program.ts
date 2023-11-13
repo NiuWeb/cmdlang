@@ -28,10 +28,10 @@ export class Program<Context, Value = void> {
      * Where the first name is the root command, the next is
      * one of its children and so on. Also returns the list
      * of names that were not found.
-     * @returns [command, remainingNames]
+     * @returns [command, remainingNames, commandPath]
      */
-    public findCommand(names: string[]): [Command<Context, Value> | undefined, string[]] {
-        if (!this.commands[names[0]]) return [undefined, names]
+    public findCommand(names: string[]): [Command<Context, Value> | undefined, string[], string[]] {
+        if (!this.commands[names[0]]) return [undefined, names, []]
 
         let cmd: Command<Context, Value> | undefined = this.commands[names[0]]
         let i = 1
@@ -41,7 +41,7 @@ export class Program<Context, Value = void> {
             i++
         }
 
-        return [cmd, names.slice(i)]
+        return [cmd, names.slice(i), names.slice(0, i)]
     }
 
 
