@@ -81,6 +81,7 @@ test("compiling", () => {
     const cmd = compiler.compileString(`
     
         const $pi {22/7}
+        const $po 50
 
         square add width=5 height=7 // instruction 1
         square add width={ // instruction 2
@@ -93,15 +94,17 @@ test("compiling", () => {
         square perimeter { 5/5 } /* instruction 4 */
 
         echo $pi
+        echo $po
     `)
 
 
 
     console.log(`compiled string: "${cmd.String()}"`)
 
-    const [, , a, b, c] = cmd()
+    const [, , a, b, c, d] = cmd()
 
     expect(a).toBeCloseTo(2 * 5 + 2 * 7)
     expect(b).toBeCloseTo(2 * 4 + 2 * (1 + (22 / 7) ** 2))
     expect(c).toEqual((22 / 7).toString())
+    expect(d).toEqual("50")
 })
