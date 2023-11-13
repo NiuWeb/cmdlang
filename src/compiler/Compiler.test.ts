@@ -85,6 +85,10 @@ test("compiling", () => {
 
     `)
 
+
+
+    console.log(`compiled string: "${cmd.String()}"`)
+
     const [, , a, b] = cmd()
 
     expect(a).toBeCloseTo(2 * 5 + 2 * 7)

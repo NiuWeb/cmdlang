@@ -3,7 +3,7 @@ import { Parser as LangParser } from "./Parser"
 import { EXPR_CONST } from "./expressions"
 import { CompilerOptions, Instruction, Token } from "./types"
 import { Program } from "@src/cmd/command/Program"
-import { Compiled } from "@src/cmd/command/Compiled"
+import { Compiled, CompiledFn } from "@src/cmd/command/Compiled"
 
 /**
  * The compiler takes a code string and transform it to a list of instructions
@@ -44,7 +44,7 @@ export class Compiler<Context, Value> {
 
     public compile(instructions: Instruction[], options: CompilerOptions = {}): Compiled<Value[]> {
         const logger = this.program.logger
-        const functions: Compiled<Value>[] = []
+        const functions: CompiledFn<Value>[] = []
 
         const lineStart = Math.max(1, Math.floor(options.line || 1))
 
@@ -54,7 +54,7 @@ export class Compiler<Context, Value> {
                 logger.setLine(instruction.start)
                 logger.setLine(logger.line + lineStart - 1)
                 const compiled = this.program.compile(instruction.values)
-                const wrapped: Compiled<Value> = () => {
+                const wrapped: CompiledFn<Value> = () => {
                     try {
                         return compiled()
                     } catch (e) {
@@ -85,7 +85,9 @@ export class Compiler<Context, Value> {
             }
         }
 
-        return () => functions.map(f => f())
+        return Object.assign(() => functions.map(f => f()), {
+            String: () => instructions.map(i => i.values.join(" ")).join("\n")
+        })
     }
 
 

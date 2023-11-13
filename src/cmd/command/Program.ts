@@ -62,6 +62,8 @@ export class Program<Context, Value = void> {
         const parser = new ArgumentParser(cmd.arguments || "", cmd.docs)
         const args = parser.parseList(rem)
 
-        return fn(args, this)
+        return Object.assign(fn(args, this), {
+            String: () => parts.join(" ")
+        })
     }
 }
