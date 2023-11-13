@@ -1,6 +1,6 @@
 {
   "name": "@bygdle/cmdlang",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "simple command-line language with support for embed mathematical expressions",
   "main": "lib/index.js",
   "scripts": {
