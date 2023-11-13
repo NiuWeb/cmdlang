@@ -84,7 +84,7 @@ export class ProgramDocs {
         let text = ""
 
         if (markdown) {
-            text += "### "
+            text += "## "
         }
 
         text += "command `" + fullName + "`\n\n"
@@ -92,7 +92,7 @@ export class ProgramDocs {
         text += "\n\n"
 
         if (markdown) {
-            text += "#### "
+            text += "### "
         }
 
         text += "Syntax:\n\n"
@@ -109,7 +109,7 @@ export class ProgramDocs {
         text += "\n"
 
         if (markdown) {
-            text += "#### "
+            text += "### "
         }
 
         text += "Arguments:\n\n"
@@ -126,7 +126,7 @@ export class ProgramDocs {
 
         if (cmd.example) {
             if (markdown) {
-                text += "#### "
+                text += "### "
             }
 
             text += "Examples:\n\n"
@@ -147,7 +147,7 @@ export class ProgramDocs {
 
         if (cmd.children) {
             if (markdown) {
-                text += "#### "
+                text += "### "
             }
 
             text += "Subcommands:\n\n"
