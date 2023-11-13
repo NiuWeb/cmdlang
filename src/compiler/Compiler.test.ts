@@ -33,7 +33,16 @@ test("compiler preprocessing", () => {
 test("compiling", () => {
     const squares: { w: number, h: number }[] = []
 
-    const program = new Program(squares, {
+    const program = new Program<typeof squares, void | number | string>(squares, {
+        "echo": {
+            name: "echo",
+            arguments: "[text...]",
+            compile({ values }) {
+                return () => {
+                    return values.join(" ")
+                }
+            },
+        },
         "square": {
             name: "square",
             children: {
@@ -83,14 +92,16 @@ test("compiling", () => {
         square perimeter 0 # instruction 3
         square perimeter { 5/5 } /* instruction 4 */
 
+        echo $pi
     `)
 
 
 
     console.log(`compiled string: "${cmd.String()}"`)
 
-    const [, , a, b] = cmd()
+    const [, , a, b, c] = cmd()
 
     expect(a).toBeCloseTo(2 * 5 + 2 * 7)
     expect(b).toBeCloseTo(2 * 4 + 2 * (1 + (22 / 7) ** 2))
+    expect(c).toEqual((22 / 7).toString())
 })

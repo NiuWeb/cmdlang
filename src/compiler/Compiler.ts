@@ -146,7 +146,7 @@ export class Compiler<Context, Value> {
                     }
                 }
 
-                const parts = token.values.map(t => t.value)
+                const parts = token.values.map(t => this.replaceConstants(t.value))
 
                 result.push({
                     start: token.start,
