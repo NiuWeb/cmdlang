@@ -40,16 +40,22 @@ export class Compiler<Context, Value> {
     public compileString(input: string, options: CompilerOptions = {}): Compiled<Value[]> {
         try {
             const instructions = this.preprocess(input)
-            return this.compile(instructions, options)    
-        } catch(e) {
+            return this.compile(instructions, options)
+        } catch (e) {
             if (e instanceof Error) {
                 this.program.logger.error(e.message)
             } else {
                 this.program.logger.error(String(e).valueOf())
             }
-            throw e
+
+            if (!this.catch)
+                throw e
+
+            return Object.assign(() => [], {
+                String: () => "/* error */"
+            })
         }
-        
+
     }
 
     public compile(instructions: Instruction[], options: CompilerOptions = {}): Compiled<Value[]> {
