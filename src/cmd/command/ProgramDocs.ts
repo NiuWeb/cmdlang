@@ -20,6 +20,9 @@ export class ProgramDocs {
     public markdown(parts?: string | string[]) {
         if (typeof parts === "string") {
             parts = CmdSplit(parts)
+            if (parts.length === 0 || (parts.length === 1 && parts[0] === "")) {
+                parts = undefined
+            }
         }
         return this.doc(parts, true)
     }
@@ -32,6 +35,9 @@ export class ProgramDocs {
     public text(parts?: string | string[]) {
         if (typeof parts === "string") {
             parts = CmdSplit(parts)
+            if (parts.length === 1 && parts[0] === "") {
+                parts = undefined
+            }
         }
         return this.doc(parts, false)
     }
@@ -41,7 +47,7 @@ export class ProgramDocs {
      * Gets all the full commands, including subcommands.
      */
     public allCommands(): string[] {
-        const result : string[] = []
+        const result: string[] = []
 
         function recurse(cmd: Command<unknown>, parts: string[] = []) {
             if (cmd.children) {
