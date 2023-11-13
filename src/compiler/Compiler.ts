@@ -38,8 +38,18 @@ export class Compiler<Context, Value> {
      * the list of all instruction results
      */
     public compileString(input: string, options: CompilerOptions = {}): Compiled<Value[]> {
-        const instructions = this.preprocess(input)
-        return this.compile(instructions, options)
+        try {
+            const instructions = this.preprocess(input)
+            return this.compile(instructions, options)    
+        } catch(e) {
+            if (e instanceof Error) {
+                this.program.logger.error(e.message)
+            } else {
+                this.program.logger.error(String(e).valueOf())
+            }
+            throw e
+        }
+        
     }
 
     public compile(instructions: Instruction[], options: CompilerOptions = {}): Compiled<Value[]> {
@@ -169,9 +179,6 @@ export class Compiler<Context, Value> {
      */
     public replaceConstants(input: string, numberOnly = false) {
         return input.replace(EXPR_CONST, (match) => {
-
-            console.log("replacing", match)
-
             const value = this.constants.get(match)
             if (value === undefined) return match
 
