@@ -218,10 +218,10 @@ export class Compiler<Context, Value> {
         input = "\n".repeat(token.start[0] - 1) + " ".repeat(token.start[1] - 1) + input
 
         const expr = this.exprParser.parse(input)
-        if (expr.length === 0) {
+        const values = expr.evaluateAll()
+        if (values.length === 0) {
             return 0
-        } else {
-            return expr.evaluate(expr.length - 1)
         }
+        return values[values.length - 1]
     }
 }
