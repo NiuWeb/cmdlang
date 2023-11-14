@@ -7,7 +7,7 @@ A command-line language.
 npm i @bygdle/cmdlang
 ```
 
-## 2, Usage
+## 2. Usage
 The package exposes four main classes: the program and compiler, and a parser for the language instructions and expressions.
 
 The most basic usage requires a program and a compiler, as follows:
@@ -203,3 +203,7 @@ const $B { 10*$A }
 
 command arg1=$B
 ```
+
+The embed expressions uses this parser:
+
+[https://github.com/NiuWeb/expr-parser](https://github.com/NiuWeb/expr-parser)
