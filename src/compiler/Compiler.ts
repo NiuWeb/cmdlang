@@ -178,15 +178,17 @@ export class Compiler<Context, Value> {
 
     /**
      * Replaces all constants in the form `$name` with their value.
-     * If a constant name is not found, it is left as is.
+     * If a constant name is not found, throws an error.
      * @param input The input to replace in
      * @param numberOnly If true, only constants with a number value will be replaced
      * @returns The input with constants replaced
      */
     public replaceConstants(input: string, numberOnly = false) {
-        return input.replace(EXPR_CONST, (match) => {
-            const value = this.constants.get(match)
-            if (value === undefined) return match
+        return input.replace(EXPR_CONST, (match, onlyName) => {
+            const value = this.constants.get(match) || this.constants.get(onlyName)
+            if (value === undefined) {
+                throw new Error(`constant "${match}" not found`)
+            }
 
             if (numberOnly) {
                 let num = parseFloat(value)
