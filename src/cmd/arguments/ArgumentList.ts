@@ -13,9 +13,9 @@ export interface ArgumentList {
      */
     named: Dictionary
     /**
-     * Position of the named arguments in the original parts
+     * Index of the positional and named arguments in the original parts
      */
-    namedPos: Dictionary<number>
+    index: Dictionary<number, number | string>
     /**
      * Original parts
      */

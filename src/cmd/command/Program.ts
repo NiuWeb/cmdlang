@@ -4,6 +4,7 @@ import { Compiled } from "./Compiled"
 import { ArgumentParser } from "../arguments/ArgumentParser"
 import { Logger } from "@src/logger/Logger"
 import { Expression } from "@bygdle/expr-parser"
+import { ArgumentGetter } from "../arguments/ArgumentGetter"
 
 /**
  * A program contains a tree of commands, and a context
@@ -49,8 +50,13 @@ export class Program<Context, Value = void> {
     /**
      * Compiles the parts of an instruction to a compiled command.
      */
-    public compile(parts: string[], expressions: (Expression | undefined)[] = []): Compiled<Value> {
-        const [cmd, rem] = this.findCommand(parts)
+    public compile(parts: string[], _expressions: (Expression | undefined)[] = []): Compiled<Value> {
+        const origin = parts.join(" ")
+        const [cmd, rem, cmdpath] = this.findCommand(parts)
+
+        const expressions = [..._expressions]
+        expressions.splice(0, cmdpath.length)
+
         if (!cmd) {
             throw new Error(`command not found: ${parts.join(" ")}`)
         }
@@ -62,10 +68,12 @@ export class Program<Context, Value = void> {
 
         const parser = new ArgumentParser(cmd.arguments || "", cmd.docs)
         const args = parser.parseList(rem)
-        const input = { ...args, expressions }
+        const get = new ArgumentGetter(args, expressions)
+        const input = { ...args, expressions, get }
+
 
         return Object.assign(fn(input, this), {
-            String: () => parts.join(" ")
+            String: () => origin
         })
     }
 }

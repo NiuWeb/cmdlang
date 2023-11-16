@@ -70,11 +70,7 @@ export class Compiler<Context, Value> {
                 logger.setLine(instruction.start)
                 logger.setLine(logger.line + lineStart - 1)
 
-                const expressions = [...instruction.expressions]
-                const [, , cmdpath] = this.program.findCommand(instruction.values)
-                expressions.splice(0, cmdpath.length)
-
-                const compiled = this.program.compile(instruction.values, expressions)
+                const compiled = this.program.compile(instruction.values, instruction.expressions)
                 const wrapped: CompiledFn<Value> = () => {
                     try {
                         return compiled()

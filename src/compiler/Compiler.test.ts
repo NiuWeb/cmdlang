@@ -89,8 +89,8 @@ const program = new Program<typeof squares, void | number | string>(squares, {
     "expr2": {
         name: "expr2",
         arguments: "args... expr=",
-        compile({ namedPos, expressions }) {
-            const expr = expressions[namedPos.expr]
+        compile({ index, expressions }) {
+            const expr = expressions[index.expr]
             if (!expr) {
                 throw new Error("no expression")
             }
@@ -98,6 +98,17 @@ const program = new Program<typeof squares, void | number | string>(squares, {
                 expr.context.setVar("x", 5)
                 return expr.evaluate(expr.length - 1)
             }
+        }
+    },
+    "expr3": {
+        name: "expr3",
+        arguments: "value1 value2 x=",
+        compile({ get }) {
+            return () => {
+                get.expression("x")?.context.setVar("y", 5)
+                return get.number("x") + get.number(0) + get.number(1)
+            }
+
         }
     }
 })
@@ -153,4 +164,17 @@ test("compile with non-preprocessed expressions", () => {
     const [u, v] = cmd()
     expect(u).toEqual(6)
     expect(v).toEqual(6.5)
+})
+
+
+test("compile and get numeric values", () => {
+
+    const compiler = new Compiler(program)
+
+    const cmd = compiler.compileString(`
+        expr3 {@25/100} 150% x={@1 + y}
+    `)
+
+    const [x] = cmd()
+    expect(x).toBeCloseTo(25 / 100 + 1.5 + 6)
 })

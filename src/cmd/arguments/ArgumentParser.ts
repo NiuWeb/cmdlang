@@ -223,19 +223,20 @@ export class ArgumentParser {
     private _parse(parts: string[]): ArgumentList {
         const values: string[] = []
         const named: Dictionary = {}
-        const namedPos: Dictionary<number> = {}
+        const index: Dictionary<number, number | string> = {}
 
         for (let i = 0; i < parts.length; i++) {
             const arg = parts[i]
             if (arg.includes("=")) {
                 const [name, value] = arg.split("=")
                 named[name] = value
-                namedPos[name] = i
+                index[name] = i
             } else {
                 values.push(arg)
+                index[i] = i
             }
         }
-        return { values, named, namedPos, parts }
+        return { values, named, index, parts }
     }
 
     /**
