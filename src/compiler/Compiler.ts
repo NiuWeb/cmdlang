@@ -69,7 +69,12 @@ export class Compiler<Context, Value> {
             try {
                 logger.setLine(instruction.start)
                 logger.setLine(logger.line + lineStart - 1)
-                const compiled = this.program.compile(instruction.values)
+
+                const expressions = [...instruction.expressions]
+                const [, , cmdpath] = this.program.findCommand(instruction.values)
+                expressions.splice(0, cmdpath.length)
+
+                const compiled = this.program.compile(instruction.values, expressions)
                 const wrapped: CompiledFn<Value> = () => {
                     try {
                         return compiled()
@@ -142,7 +147,14 @@ export class Compiler<Context, Value> {
                 // for an instruction token, evaluate all expressions
                 for (const t of token.values) {
                     if (t.type === "expression") {
-                        t.value = this.evaluateExpression(t).toString()
+                        // if the expression starts with @, it's a post-process expression
+                        // so it won't be evaluated at the pre-processing.
+                        if (t.value.startsWith("@")) {
+                            t.value = t.value.slice(1)
+                            t.expression = this.parseExpression(t)
+                        } else {
+                            t.value = this.evaluateExpression(t).toString()
+                        }
                     }
                 }
 
@@ -163,11 +175,13 @@ export class Compiler<Context, Value> {
                 }
 
                 const parts = token.values.map(t => this.replaceConstants(t.value))
+                const expressions = token.values.map(t => t.expression)
 
                 result.push({
                     start: token.start,
                     end: token.end,
-                    values: parts
+                    values: parts,
+                    expressions
                 })
             }
         }
@@ -213,17 +227,26 @@ export class Compiler<Context, Value> {
      * one is returned.
      */
     private evaluateExpression(token: Token) {
+        const expr = this.parseExpression(token)
+        const values = expr.evaluateAll()
+        if (values.length === 0) {
+            return 0
+        }
+        return values[values.length - 1]
+    }
+
+    /**
+     * Parses an expression with the constants replaced and using
+     * the expression parser.
+     * Returns the expression object, it won't be evaluated.
+     */
+    private parseExpression(token: Token) {
         let input = token.value
         input = this.replaceConstants(input, true)
 
         // add line breaks at the beginnig
         input = "\n".repeat(token.start[0] - 1) + " ".repeat(token.start[1] - 1) + input
 
-        const expr = this.exprParser.parse(input)
-        const values = expr.evaluateAll()
-        if (values.length === 0) {
-            return 0
-        }
-        return values[values.length - 1]
+        return this.exprParser.parse(input)
     }
 }

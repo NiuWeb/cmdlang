@@ -30,50 +30,65 @@ test("compiler preprocessing", () => {
 })
 
 
-test("compiling", () => {
-    const squares: { w: number, h: number }[] = []
 
-    const program = new Program<typeof squares, void | number | string>(squares, {
-        "echo": {
-            name: "echo",
-            arguments: "[text...]",
-            compile({ values }) {
-                return () => {
-                    return values.join(" ")
+const squares: { w: number, h: number }[] = []
+const program = new Program<typeof squares, void | number | string>(squares, {
+    "echo": {
+        name: "echo",
+        arguments: "[text...]",
+        compile({ values }) {
+            return () => {
+                return values.join(" ")
+            }
+        },
+    },
+    "square": {
+        name: "square",
+        children: {
+            "add": {
+                name: "add",
+                arguments: "[width=] [height=]",
+                compile({ named }, { context }) {
+                    const { width, height } = named
+                    const w = Number(width).valueOf()
+                    const h = Number(height).valueOf()
+
+                    return () => {
+                        context.push({ w, h })
+                    }
+                }
+            },
+            "perimeter": {
+                name: "perimeter",
+                arguments: "index",
+                compile({ values }, { context }) {
+                    const index = Number(values[0]).valueOf()
+
+                    return () => {
+                        const square = context[index]
+                        return square.w * 2 + square.h * 2
+                    }
                 }
             },
         },
-        "square": {
-            name: "square",
-            children: {
-                "add": {
-                    name: "add",
-                    arguments: "[width=] [height=]",
-                    compile({ named }, { context }) {
-                        const { width, height } = named
-                        const w = Number(width).valueOf()
-                        const h = Number(height).valueOf()
-
-                        return () => {
-                            context.push({ w, h })
-                        }
-                    }
-                },
-                "perimeter": {
-                    name: "perimeter",
-                    arguments: "index",
-                    compile({ values }, { context }) {
-                        const index = Number(values[0]).valueOf()
-
-                        return () => {
-                            const square = context[index]
-                            return square.w * 2 + square.h * 2
-                        }
-                    }
-                }
+    },
+    "expr": {
+        name: "expr",
+        arguments: "value expr",
+        compile({ expressions }) {
+            const expr = expressions[1]
+            if (!expr) {
+                throw new Error("no expression")
+            }
+            return () => {
+                expr.context.setVar("x", 5)
+                return expr.evaluate(expr.length - 1)
             }
         }
-    })
+    }
+})
+
+test("compiling", () => {
 
     const compiler = new Compiler(program)
 
@@ -110,4 +125,16 @@ test("compiling", () => {
 
     const cmd2 = compiler.compileString("const $x 1\r\n\recho $x")
     expect(cmd2()).toEqual(["1"])
+})
+
+
+test("compile with non-preprocessed expressions", () => {
+    const compiler = new Compiler(program)
+
+    const cmd = compiler.compileString(`
+        expr {1.5} {@ 1.5 + x}
+    `)
+
+    const [v] = cmd()
+    expect(v).toEqual(6.5)
 })
