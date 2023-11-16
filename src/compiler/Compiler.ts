@@ -67,12 +67,13 @@ export class Compiler<Context, Value> {
         for (const instruction of instructions) {
             // compile all instructions
             try {
-                logger.setLine(instruction.start)
-                logger.setLine(logger.line + lineStart - 1)
+                const line = instruction.start[0] + lineStart - 1
+                logger.setLine(line)
 
                 const compiled = this.program.compile(instruction.values, instruction.expressions)
                 const wrapped: CompiledFn<Value> = () => {
                     try {
+                        logger.setLine(line)
                         return compiled()
                     } catch (e) {
                         if (e instanceof Error) {
