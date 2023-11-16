@@ -1,4 +1,4 @@
-import { Parser as ExprParser } from "@bygdle/expr-parser"
+import { Parser as ExprParser, Expression } from "@bygdle/expr-parser"
 import { Parser as LangParser } from "./Parser"
 import { EXPR_CONST } from "./expressions"
 import { CompilerOptions, Instruction, Token } from "./types"
@@ -58,48 +58,68 @@ export class Compiler<Context, Value> {
 
     }
 
-    public compile(instructions: Instruction[], options: CompilerOptions = {}): Compiled<Value[]> {
+    /**
+     * Compiles a single instruction into a function
+     * @param parts Command parts
+     * @param line  The line number of the instruction
+     * @param expressions The expressions of the instruction
+     * @returns A compiled function that runs the instruction
+     */
+    public compileParts(parts: string[], line = 1, expressions: (Expression | undefined)[] = []): CompiledFn<Value> | undefined {
         const logger = this.program.logger
+        try {
+            logger.setLine(line)
+
+            const compiled = this.program.compile(parts, expressions)
+            const wrapped: CompiledFn<Value> = () => {
+                try {
+                    logger.setLine(line)
+                    return compiled()
+                } catch (e) {
+                    if (e instanceof Error) {
+                        logger.error(e.message)
+                        e.message = `Error at ${line}: ${e.message}`
+                    } else {
+                        logger.error(String(e).valueOf())
+                    }
+                    if (!this.catch) {
+                        throw e
+                    }
+                    return undefined as Value
+                }
+            }
+            return wrapped
+        } catch (e) {
+            // add the instruction start to the error message
+            if (e instanceof Error) {
+                logger.error(e.message)
+                e.message = `Error at ${line}: ${e.message}`
+            } else {
+                logger.error(String(e).valueOf())
+            }
+            if (!this.catch) {
+                throw e
+            }
+        }
+        return undefined
+    }
+
+    /**
+     * Compiles a list of instructions into a single function
+     * @param instructions Preprocessed instructions
+     * @param options Compiler options
+     * @returns A compiled function that runs all instructions
+     */
+    public compile(instructions: Instruction[], options: CompilerOptions = {}): Compiled<Value[]> {
         const functions: CompiledFn<Value>[] = []
 
         const lineStart = Math.max(1, Math.floor(options.line || 1))
 
         for (const instruction of instructions) {
-            // compile all instructions
-            try {
-                const line = instruction.start[0] + lineStart - 1
-                logger.setLine(line)
-
-                const compiled = this.program.compile(instruction.values, instruction.expressions)
-                const wrapped: CompiledFn<Value> = () => {
-                    try {
-                        logger.setLine(line)
-                        return compiled()
-                    } catch (e) {
-                        if (e instanceof Error) {
-                            logger.error(e.message)
-                            e.message = `Error at ${instruction.start}: ${e.message}`
-                        } else {
-                            logger.error(String(e).valueOf())
-                        }
-                        if (!this.catch) {
-                            throw e
-                        }
-                        return undefined as Value
-                    }
-                }
-                functions.push(wrapped)
-            } catch (e) {
-                // add the instruction start to the error message
-                if (e instanceof Error) {
-                    logger.error(e.message)
-                    e.message = `Error at ${instruction.start}: ${e.message}`
-                } else {
-                    logger.error(String(e).valueOf())
-                }
-                if (!this.catch) {
-                    throw e
-                }
+            const line = instruction.start[0] + lineStart - 1
+            const fn = this.compileParts(instruction.values, line, instruction.expressions)
+            if (fn) {
+                functions.push(fn)
             }
         }
 
