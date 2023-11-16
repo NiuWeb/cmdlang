@@ -4,7 +4,7 @@ import { toNumber } from "@src/globals/toNumber"
 
 export class ArgumentGetter {
 
-    constructor(public list: ArgumentList, public expressions: (Expression | undefined)[]) {}
+    constructor(public list: ArgumentList, public expressions: (Expression | undefined)[]) { }
 
     /**
      * Gets the numeric value of an argument at the given position,
@@ -14,7 +14,9 @@ export class ArgumentGetter {
         const index = this.list.index[nameOrIndex]
         const expr = this.expressions[index]
         if (expr) return expr.evaluate(expr.length - 1)
-        if( typeof index === "number" ) return toNumber(this.list.values[index])
+        if (typeof nameOrIndex === "number") {
+            return toNumber(this.list.parts[index])
+        }
         return toNumber(this.list.named[nameOrIndex])
     }
 
