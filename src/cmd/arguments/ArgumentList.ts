@@ -13,6 +13,10 @@ export interface ArgumentList {
      */
     named: Dictionary
     /**
+     * Position of the named arguments in the original parts
+     */
+    namedPos: Dictionary<number>
+    /**
      * Original parts
      */
     parts: string[]

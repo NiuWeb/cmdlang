@@ -115,7 +115,7 @@ export class ArgumentParser {
                 this.max = Infinity
             }
 
-            if(!positional && optional && name.endsWith("*")) {
+            if (!positional && optional && name.endsWith("*")) {
                 this.anyNamed = true
             }
 
@@ -223,16 +223,19 @@ export class ArgumentParser {
     private _parse(parts: string[]): ArgumentList {
         const values: string[] = []
         const named: Dictionary = {}
+        const namedPos: Dictionary<number> = {}
 
-        for (const arg of parts) {
+        for (let i = 0; i < parts.length; i++) {
+            const arg = parts[i]
             if (arg.includes("=")) {
                 const [name, value] = arg.split("=")
                 named[name] = value
+                namedPos[name] = i
             } else {
                 values.push(arg)
             }
         }
-        return { values, named, parts }
+        return { values, named, namedPos, parts }
     }
 
     /**

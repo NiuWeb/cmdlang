@@ -85,6 +85,20 @@ const program = new Program<typeof squares, void | number | string>(squares, {
                 return expr.evaluate(expr.length - 1)
             }
         }
+    },
+    "expr2": {
+        name: "expr2",
+        arguments: "args... expr=",
+        compile({ namedPos, expressions }) {
+            const expr = expressions[namedPos.expr]
+            if (!expr) {
+                throw new Error("no expression")
+            }
+            return () => {
+                expr.context.setVar("x", 5)
+                return expr.evaluate(expr.length - 1)
+            }
+        }
     }
 })
 
@@ -132,9 +146,11 @@ test("compile with non-preprocessed expressions", () => {
     const compiler = new Compiler(program)
 
     const cmd = compiler.compileString(`
+        expr2 expr={@1+x} 1 2 3
         expr {1.5} {@ 1.5 + x}
     `)
 
-    const [v] = cmd()
+    const [u, v] = cmd()
+    expect(u).toEqual(6)
     expect(v).toEqual(6.5)
 })

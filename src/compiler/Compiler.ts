@@ -169,6 +169,7 @@ export class Compiler<Context, Value> {
                     if (prev.end[0] === curr.start[0] && prev.end[1] === curr.start[1]) {
                         prev.value += curr.value
                         prev.end = curr.end
+                        prev.expression = curr.expression
                         token.values.splice(i, 1)
                         i--
                     }
