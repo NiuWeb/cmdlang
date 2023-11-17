@@ -39,7 +39,7 @@
     "typescript-transform-paths": "^3.4.6"
   },
   "dependencies": {
-    "@bygdle/expr-parser": "^0.9.3",
+    "@bygdle/expr-parser": "^0.9.4",
     "sprintf-js": "^1.1.3"
   }
 }
