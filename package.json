@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "prepare": "npx ts-patch install && npm run build",
-    "build": "lib-build -e src/index.ts -o lib -t tsconfig.json",
+    "build": "lib-build -e src/index.ts -o lib -t tsconfig.json -cjs 1",
     "dev": "lib-build -e src/index.ts -o lib -t tsconfig.json -w true",
     "test": "jest"
   },
@@ -24,7 +24,7 @@
   "author": "bygdle",
   "license": "MIT",
   "devDependencies": {
-    "@bygdle/lib-build": "^0.0.6",
+    "@bygdle/lib-build": "^0.1.2",
     "@types/jest": "^29.5.3",
     "@types/sprintf-js": "^1.1.4",
     "@typescript-eslint/eslint-plugin": "^6.2.1",
