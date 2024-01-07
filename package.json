@@ -3,6 +3,11 @@
   "version": "0.14.6",
   "description": "simple command-line language with support for embed mathematical expressions",
   "main": "lib/index.js",
+  "exports": {
+    "import": "./lib/index.js",
+    "require": "./lib/index.cjs"
+  },
+  "type": "module",
   "scripts": {
     "prepare": "npx ts-patch install && npm run build",
     "build": "lib-build -e src/index.ts -o lib -t tsconfig.json -cjs 1",
