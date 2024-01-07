@@ -7,7 +7,6 @@
     "import": "./lib/index.js",
     "require": "./lib/index.cjs"
   },
-  "type": "module",
   "scripts": {
     "prepare": "npx ts-patch install && npm run build",
     "build": "lib-build -e src/index.ts -o lib -t tsconfig.json -cjs 1",
